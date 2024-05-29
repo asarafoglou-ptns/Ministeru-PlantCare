@@ -23,7 +23,7 @@ library(remotes)
 #' @param ... No parameters yet 
 #' @return Pop-up with the user interface
 #' @export
-PlantCare <- function(){
+GUI <- function(){
 
   # Taking a Java object and putting it in a data frame
   data_string <- '
@@ -497,7 +497,7 @@ PlantCare <- function(){
   
 }
 
-PlantCare()
+GUI()
 
 
 
