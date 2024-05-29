@@ -494,16 +494,11 @@ GUI <- function(){
   #Define shiny appliction
   shinyApp(ui = ui, server = server)
   
-  runApp('C:/Users/sabina/OneDrive - UvA/.ResMas/PNS - Programming the Next Step/Ministeru-PlantCare/inst/PlantCare_app')
-  
+  runApp()
+
 }
 
 GUI()
-
-
-
-
-
 
 
 
