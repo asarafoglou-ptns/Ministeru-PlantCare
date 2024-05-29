@@ -7,7 +7,6 @@
 # install.packages("bslib")
 # install.packages("shinyquiz")
 
-
 library(dplyr)
 library(readr)
 library(jsonlite)
@@ -24,7 +23,7 @@ library(shinyquiz)
 #' @return Pop-up with the user interface
 #' @export
 
-GUI <- function(){
+#GUI <- function(){
 
   # Taking a Java object and putting it in a data frame
   plant_data_string <- '
@@ -129,33 +128,195 @@ GUI <- function(){
           "notes": "Keep away from cold rooms and areas with a draught. A stable and moderate temperature of around 19-21C is ideal for a string-of-turtles plant. Pruning can be useful to maintain a dense and healthy plant."
       }
   ]'
-      
+  
+  # Creating data frame  
   plant_data <- jsonlite::fromJSON(plant_data_string, simplifyDataFrame = TRUE)
+  
+  
+  # Adding column: After how many days the plant needs water
+  plant_data <- cbind(plant_data, watering_days = NA)
+  
+  # 2-3 times per week: every 4 days
+  plant_data$watering_days[grep("2-3 times", plant_data$watering)] <- 4
+  
+  # Every 3-7 days and once weekly: every 7 days
+  plant_data$watering_days[grep("3-7 days", plant_data$watering)] <- 7
+  plant_data$watering_days[grep("once weekly", plant_data$watering)] <- 7
+  
+  # Fortnight or every 2 weeks: every 14 days
+  plant_data$watering_days[grep("fortnight", plant_data$watering)] <- 14
+  plant_data$watering_days[grep("every 2 weeks", plant_data$watering) ] <- 14
+  
+  # Some plants do not have specified number of days; the soil must be checked
+  plant_data$watering_days[grep("soil", plant_data$watering)] <- "soil"
+  
+  
+  # Adding column: Water amount
+  plant_data <- cbind(plant_data, water_amount = NA)
+  plant_data$water_amount[grep("Moderate", plant_data$watering, ignore.case = TRUE)] <- "moderate"
+  plant_data$water_amount[grep("Low", plant_data$watering, ignore.case = TRUE)] <- "low"
+  plant_data$water_amount[grep("High", plant_data$watering, ignore.case = TRUE)] <- "high"
+  plant_data$water_amount <- ifelse(is.na(plant_data$water_amount), "moderate", plant_data$water_amount)
+  
+  
+  # Adding column: fertilizer per month
+  plant_data <- cbind(plant_data, fertilizer_growing = c(rep(1, 11)))
+  plant_data <- cbind(plant_data, fertilizer_winter = c(1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0))
+  plant_data <- cbind(plant_data, fertilizer_growing_months = c(0.5, 2, 4, 1, 1, 0.25, 2, 1, 1, 2, 0.5))
+  plant_data <- cbind(plant_data, fertilizer_winter_months = c(0.5, NA, NA, NA, NA, 1, 2, 2, NA, NA, NA))
   
   # Define UI for application
   ui <- fluidPage(
     
     # Application title
-    titlePanel("PlantCare"),
+    titlePanel("PlantCare Guide"),
     
     #Select plant from drop-down list
     sidebarLayout(
       sidebarPanel(
-        selectInput("selected_plant", 
-          label = "Select your plant from the list",
+        
+        # Select plant
+        selectInput(
+          "selected_plant", 
+          label = "Select your plant:",
           choices = c(plant_data$plant, "I don't know the name of my plant", 
                       "My plant is not on the list"), 
           multiple = FALSE
-        )
-        ), 
-      
-      mainPanel(
+        ),
+        
+        br(), # Adds space
+        
         # Image of plant during selection
         uiOutput("image"),
-        textOutput("plant_found")
         
+        #Error message if the plant is not found or the name is not known
+        textOutput("plant_found"),
         
+        br(), # Adds space
+        br(),
+        
+        # Selects which advice they want
+        selectInput(
+          "advice",
+          label = "I want advice about:",
+          choices = c("Watering", "Light", "Fertilizing", "Repotting"),
+          multiple = TRUE
+        ),
+        
+        # Action button: Restart
+        actionButton(
+          "restart",
+          label = "Restart",
+          icon = icon("rotate-right")
+        ),
+        
+        br(), # Add space
+        br(),
+        
+        # Action button: Submit
+        actionButton(
+          "submit",
+          label = "Get advice",
+          icon = icon("pagelines")
+        )
+        
+        ),
+      
+      mainPanel(
+        
+        conditionalPanel(
+          condition = "input.advice.includes(\"Watering\")",
+          
+          # Number of days since last watering
+          sliderInput(
+            "water1",
+            label = "How many days have passed since you watered your plant?",
+            min = 0,
+            max = 30,
+            value = 7,
+            round = TRUE
+          ),
+          
+          # Soil feels dry or not
+          radioButtons(
+            "water2",
+            label = "Stick your finger in the soil until your nail is completely covered. Does the soil feel dry?",
+            choices = c("Yes", "No")
+          ),
+          
+          # Signs underwatering
+          radioButtons(
+            "water3",
+            label = "Do the leaves seem dry and yellowing? This is a sign the plant needs water.",
+            choices = c("Yes", "No")
+          ),
+          
+          # Signs overwatering
+          radioButtons(
+            "water4",
+            label = "Do the leaves seem soft and limp? This is a sign of overwatering.",
+            choices = c("Yes", "No")
+          )
+          
+        ),
+        
+        conditionalPanel(
+          condition = "input.advice.includes(\"Light\")",
+        
+        # Light
+        selectInput(
+          "light",
+          label = "In which type of light do you keep your plant?",
+          choices = c("Bright indirect", "Low indirect", "Bright direct", "Low direct")
+        )
+        ),
+        
+        conditionalPanel(
+          condition = "input.advice.includes(\"Fertilizing\")",
+          
+        # Fertilizer
+        sliderInput(
+          "fertilizer",
+          label = "How many months have passed since you last fertilized your plant?",
+          min = 0,
+          max = 6,
+          value = 1
+          )
+        ),
+        
+        conditionalPanel(
+          condition = "input.advice.includes(\"Repotting\")",
+         
+        # Repotting: Drainage holes
+        radioButtons(
+          "repotting1_drainage",
+          label = "Does your pot have drainage holes?",
+          choices = c("Yes", "No")
+        ),
+        
+        conditionalPanel(
+          condition = "input.repotting1_drainage == \"Yes\"",
+        
+      # Repotting: Drainage: Pick up
+        radioButtons(
+          "repotting2",
+          label = "Pick up the pot and look at the drainage holes. Do you see roots coming out the bottom?",
+          choices = c("Yes", "No")
+        )
+        ),
+      
+      conditionalPanel(
+        condition = "input.repotting1_drainage == \"No\"",
+        
+      # Repotting: No drainage: Check roots
+        radioButtons(
+          "repotting3",
+          label = "Gently remove the plant from its pot. How do the roots look like?",
+          choices = c("I can see no visible roots", "The roots are very visible")
+        )
       )
+        )
+  )
   )
   )
   
@@ -168,7 +329,7 @@ GUI <- function(){
       # An option must be selected
       req(input$selected_plant)
       
-      # Create the path to the image file
+      # Path to the image file
       imagePath <- paste0(input$selected_plant, ".jpg")
       
       # Check if the image file exists
@@ -191,147 +352,127 @@ GUI <- function(){
       } else {
         if (input$selected_plant == "I don't know the name of my plant") {
           stop("Please find the name of your plant using this free online tool: https://plant.id/. You can then return and continue your search.")
-        } else {
-          paste("Plant Care guide:", input$selected_plant)
-        }
+        } 
       }
-      
-      
-      
     })
     
+    # Show modal dialog when "Get advice" button is pressed
+    observeEvent(input$submit, {
+      showModal(modalDialog(
+        title = paste("Care advice for your", input$selected_plant),
+        p(paste("Advice selected:", paste(input$advice, collapse = ", "))),
+        if("Watering" %in% input$advice) {
+          
+          # For the plants watered based on the "soil"
+          if(!is.numeric(plant_data[plant_data$plant == input$selected_plant, 
+                        "water_amount"])) {
+            
+            # If the soil is wet, do not water
+            if(input$water2 == "No") {
+              p(paste("Your plant is fine! No water needed yet."))
+            } else {
+              
+              # Soil is dry, no underwatering, no overwatering
+              if(input$water3 == "No" & input$water4 == "No") {
+                p(paste("Time to water your plant! Provide a", 
+                        plant_data[plant_data$plant == input$selected_plant, "water_amount"], 
+                        "quantity."))
+              } else {
+                # Soil is dry, underwatering
+                if(input$water3 == "Yes") {
+                  p(paste("Your plant really needs water. Water immediately with a", 
+                          plant_data[plant_data$plant == input$selected_plant, 
+                                     "water_amount"], 
+                          "quantity."
+                  )
+                  )
+                }
+                
+                # Soil is dry, overwatering 
+                if(input$water3 == "Yes") {
+                  p(paste("Your plant is showing sign of overwatering.",
+                          "Let it be for two days, then water with a",
+                          plant_data[plant_data$plant == input$selected_plant,
+                                     "water_amount"],
+                          "quantity."
+                  )
+                  )  
+                }
+              }
+            }
+            
+          } else { 
+            
+            # If the plant is watered based on the number of days
+            
+            # If the number of days was exceeded
+              if(input$water1 < plant_data[plant_data$plant == input$selected_plant,"water_amount"]){
+                p(paste("Your plant is fine! No water needed yet."))
+              } else { 
+                
+                # Days exceeded, wet soil
+                if(input$water2 == "No") {
+                  p(paste("Your plant is fine! No water needed yet."))
+                } else {
+                  
+                  # Dry soil, underwatering
+                  if(input$water3 == "Yes") {
+                    p(paste("Your plant really needs water. Water immediately with a", 
+                            plant_data[plant_data$plant == input$selected_plant, 
+                                       "water_amount"], 
+                            "quantity."
+                    )
+                    )
+                  } else {
+                    if (input$water4 == "Yes"){ 
+                      p(paste("Your plant is showing sign of overwatering.",
+                              "Wait two days, then water with a",
+                              plant_data[plant_data$plant == input$selected_plant,
+                                         "water_amount"],
+                              "quantity."
+                      )
+                      )
+                    } 
+                  }
+                }
+                
+              }
+            }
+          },
+        
+        if("Light" %in% input$advice) {
+          
+          # If plant_data$light matches response, don't move
+          if(grep(input$light, plant_data[plant_data$input$selected_plant, 
+                                          "light"])) {
+            p(paste("The light is good for your plant, don't move it."))
+          } else {
+            p(paste("Move your plat to a spot with", plant_data[plant_data$input$selected_plant, "light"], "light."))
+          }
+        },
+        
+        easyClose = TRUE,
+        footer = NULL
+      )
+      )
+    })
+    
+    
   }
+  
+          
+# Problem: Your plant is showing sign of overwatering. Let it be for two days, 
+  # then water with a moderate quantity.
+  # When dry, underwatered, but not overwatered
+  
   
   
   # Run the application 
   shinyApp(ui = ui, server = server)
   
-}
+#}
 
-GUI()
-
-
-
-
-advice <- create_question(
-  prompt = "I want advice about:",
-  add_choice("Watering", correct = FALSE),
-  add_choice("Fertilizer", correct = FALSE),
-  add_choice("Repotting", correct = FALSE),
-  add_choice("Light conditions", correct = FALSE),
-  add_choice("All of the above", correct = TRUE),
-  type = "multiple"
-  )
-
-water1 <- create_question(
-  "How many days have passed since you watered your plant?",
-  add_slider(min = 0, max = 14, default_position = 7, correct = 7)
-)
-
-water2 <- create_question(
-  prompt = "Stick your finger in the soil until your nail is completely covered. Does the soil feel dry?",
-  add_choice("Yes", correct = TRUE),
-  add_choice("No", correct = TRUE)
-)
-
-water3 <- create_question(
-  prompt = "Do the leaves seem dry and yellowing? This is a sign the plant needs water",
-  add_choice("Yes", correct = TRUE),
-  add_choice("No", correct = TRUE)
-)
-
-water4 <- create_question(
-  prompt = "Do the leaves seem soft and limp? This is a sign of overwatering.",
-  add_choice("Yes", correct = TRUE),
-  add_choice("No", correct = TRUE)
-)
-
-light <-  create_question(
-  prompt = "In which type of light do you keep your plant?",
-  add_choice("Bright indirect", correct = TRUE),
-  add_choice("Low indirect", correct = TRUE),
-  add_choice("Bright direct", correct = TRUE),
-  add_choice("Low direct", correct = TRUE)
-)
-
-fertilizer <- create_question(
-    prompt = "When is the last time when you fertilized your plant?",
-    add_choice("Never", correct = TRUE),
-    add_choice("One month ago", correct = TRUE),
-    add_choice("Two weeks ago", correct = TRUE),
-    add_choice("Last week", correct = TRUE),
-    add_choice("Less than a week ago", correct = TRUE)
-  )
-
-repotting1 <- create_question(
-  prompt = "Does your pot have drainage holes?",
-  add_choice("Yes", correct = TRUE),
-  add_choice("No", correct = TRUE)
-)
-
-# Repotting2 should only be seen by people who select "yes" on repotting1
-repotting2 <- create_question(
-  prompt = "Pick up the pot and look at the drainage holes. Do you see roots coming out the bottom?",
-  add_choice("Yes", correct = TRUE),
-  add_choice("No", correct = TRUE)
-)
-
-# Repotting3 should only be seen by people who select "no" on repotting1
-repotting3 <- create_question(
-  prompt = "Gently remove the plant from its pot. How do the roots look like?",
-  add_choice("I can see no visible roots", correct = TRUE),
-  add_choice("The roots are very visible", correct = TRUE)
-)
-# Ideally, add pictures to this
-
-# Create the quiz
-quiz <- create_quiz(advice, water1, water2, water3, water4, light, fertilizer, repotting1, repotting2, repotting3)
-
-# Set quiz options
-set_quiz_options(progress_bar = TRUE, end_on_first_wrong = FALSE)
-
-# Preview the quiz
-preview_app(quiz)
-
-
-
-
-
-
-questionnaire <- function(){
-    advice <- readline("What do you want advice about? Options include: Water, Fertilizing, Light, Repotting, All of the above ")  
-    if (advice == "Water" | advice == "All of the above") {
-      water1 <- readline("How many days have passed since you watered your plant? Insert a number between 0 and 30. ")
-      water2 <- readline("Stick your finger in the soil until your nail is completely covered. Does the soil feel dry? Respond with \"Yes\" or \"No\". ")
-      water3 <- readline("Do the leaves seem dry and yellowing? This is a sign the plant needs water. Respond with \"Yes\" or \"No\". ")
-      water4 <- readline("Do the leaves seem soft and limp? This is a sign of overwatering. Respond with \"Yes\" or \"No\". ")
-    }
-    if (advice == "Light" | advice == "All of the above"){
-      light <- readline("In which type of light do you keep your plant? Options include: Bright direct, Low direct, Bright indirect, Low indirect. ")
-    }
-    if (advice == "Fertilizer" | advice == "All of the above"){
-      fertilizer <- readline("When is the last time when you fertilized your plant? Options include: Never, More than two months ago, More than a month ago, Less than a month ago, Less than two weeks ago. ")
-    }
-    if (advice == "Repotting" | advice == "All of the above"){
-      repotting1 <- readline("Does your pot have drainage holes? Respond with \"Yes\" or \"No\". ")
-      if (repotting1 == "Yes") {
-        repotting2 <- readline("Pick up the pot and look at the drainage holes. Do you see roots coming out the bottom? Respond with \"Yes\" or \"No\". ")
-      } else {
-        repotting3 <- readline("Gently remove the plant from its pot. Can you see visible roots? Respond with \"Yes\" or \"No\". ")
-      }
-    }
-    result <- data.frame(water1 = water1, water2 = water2, water3 = water3, water4 = water4, light = light, fertilizer = fertilizer, repotting1 = repotting1, repotting2 = repotting2, repotting3 = repotting3)
-    return(result)
-}
-
-questionnaire()
-
-
-
-
-
-
-
+#GUI()
 
 
 
