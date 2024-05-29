@@ -23,7 +23,7 @@ library(shinyquiz)
 #' @return Pop-up with the user interface
 #' @export
 
-#GUI <- function(){
+GUI <- function(){
 
   # Taking a Java object and putting it in a data frame
   plant_data_string <- '
@@ -470,9 +470,9 @@ library(shinyquiz)
   # Run the application 
   shinyApp(ui = ui, server = server)
   
-#}
+}
 
-#GUI()
+GUI()
 
 
 
