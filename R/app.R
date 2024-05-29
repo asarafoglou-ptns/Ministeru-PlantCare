@@ -5,7 +5,6 @@
 # install.packages("jsonlite")
 # install.packages("shiny")
 # install.packages("bslib")
-# install.packages("shinyquiz")
 
 library(dplyr)
 library(readr)
@@ -13,20 +12,21 @@ library(jsonlite)
 library(shiny)
 library(bslib)
 library(remotes)
-library(shinyquiz)
 
 
 #' @title Shiny app that tells you when to water your plant
 #' @description
-#' An interactive app that gives advice on whether to water, fertilize, or change light conditions for common houseplants. Assumes the user is close to their plant (i.e., to feel whether the soil is wet and see if the leaves are droopy).
+#' An interactive app that gives advice on whether to water, fertilize, or 
+#' change light conditions for common houseplants. Assumes the user is close to 
+#' their plant, i.e., to feel whether the soil is wet and see if the 
+#' leaves are droopy.
 #' @param ... No parameters yet 
 #' @return Pop-up with the user interface
 #' @export
-
-GUI <- function(){
+PlantCare <- function(){
 
   # Taking a Java object and putting it in a data frame
-  plant_data_string <- '
+  data_string <- '
   [
       {
           "plant": "Spider Plant",
@@ -130,40 +130,45 @@ GUI <- function(){
   ]'
   
   # Creating data frame  
-  plant_data <- jsonlite::fromJSON(plant_data_string, simplifyDataFrame = TRUE)
+  data <- jsonlite::fromJSON(data_string, simplifyDataFrame = TRUE)
   
   
   # Adding column: After how many days the plant needs water
-  plant_data <- cbind(plant_data, watering_days = NA)
+  data <- cbind(data, watering_days = NA)
   
   # 2-3 times per week: every 4 days
-  plant_data$watering_days[grep("2-3 times", plant_data$watering)] <- 4
+  data$watering_days[grep("2-3 times", data$watering)] <- 4
   
   # Every 3-7 days and once weekly: every 7 days
-  plant_data$watering_days[grep("3-7 days", plant_data$watering)] <- 7
-  plant_data$watering_days[grep("once weekly", plant_data$watering)] <- 7
+  data$watering_days[grep("3-7 days", data$watering)] <- 7
+  data$watering_days[grep("once weekly", data$watering)] <- 7
   
   # Fortnight or every 2 weeks: every 14 days
-  plant_data$watering_days[grep("fortnight", plant_data$watering)] <- 14
-  plant_data$watering_days[grep("every 2 weeks", plant_data$watering) ] <- 14
+  data$watering_days[grep("fortnight", data$watering)] <- 14
+  data$watering_days[grep("every 2 weeks", data$watering) ] <- 14
   
   # Some plants do not have specified number of days; the soil must be checked
-  plant_data$watering_days[grep("soil", plant_data$watering)] <- "soil"
+  data$watering_days[grep("soil", data$watering)] <- "soil"
   
   
   # Adding column: Water amount
-  plant_data <- cbind(plant_data, water_amount = NA)
-  plant_data$water_amount[grep("Moderate", plant_data$watering, ignore.case = TRUE)] <- "moderate"
-  plant_data$water_amount[grep("Low", plant_data$watering, ignore.case = TRUE)] <- "low"
-  plant_data$water_amount[grep("High", plant_data$watering, ignore.case = TRUE)] <- "high"
-  plant_data$water_amount <- ifelse(is.na(plant_data$water_amount), "moderate", plant_data$water_amount)
+  data <- cbind(data, water_amount = NA)
+  data$water_amount[grep("Moderate", 
+                         data$watering,ignore.case = T)] <- "moderate"
+  data$water_amount[grep("Low", data$watering, ignore.case = T)] <- "low"
+  data$water_amount[grep("High", data$watering, ignore.case = T)] <- "high"
+  data$water_amount <- ifelse(is.na(data$water_amount), 
+                              "moderate", 
+                              data$water_amount)
   
   
   # Adding column: fertilizer per month
-  plant_data <- cbind(plant_data, fertilizer_growing = c(rep(1, 11)))
-  plant_data <- cbind(plant_data, fertilizer_winter = c(1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0))
-  plant_data <- cbind(plant_data, fertilizer_growing_months = c(0.5, 2, 4, 1, 1, 0.25, 2, 1, 1, 2, 0.5))
-  plant_data <- cbind(plant_data, fertilizer_winter_months = c(0.5, NA, NA, NA, NA, 1, 2, 2, NA, NA, NA))
+  data <- cbind(data, f_growing = c(rep(1, 11)))
+  data <- cbind(data, f_winter = c(1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0))
+  data <- cbind(data, f_growing_months = c(0.5, 2, 4, 1, 1, 0.25, 2, 1, 1, 2, 
+                                           0.5))
+  data <- cbind(data, f_winter_months = c(0.5, NA, NA, NA, NA, 1, 2, 2, NA, NA, 
+                                          NA))
   
   # Define UI for application
   ui <- fluidPage(
@@ -177,9 +182,9 @@ GUI <- function(){
         
         # Select plant
         selectInput(
-          "selected_plant", 
+          "my_plant", 
           label = "Select your plant:",
-          choices = c(plant_data$plant, "I don't know the name of my plant", 
+          choices = c(data$plant, "I don't know the name of my plant", 
                       "My plant is not on the list"), 
           multiple = FALSE
         ),
@@ -240,21 +245,24 @@ GUI <- function(){
           # Soil feels dry or not
           radioButtons(
             "water2",
-            label = "Stick your finger in the soil until your nail is completely covered. Does the soil feel dry?",
+            label = paste("Stick your finger in the soil until your nail is",
+                          "completely covered. Does the soil feel dry?"),
             choices = c("Yes", "No")
           ),
           
           # Signs underwatering
           radioButtons(
             "water3",
-            label = "Do the leaves seem dry and yellowing? This is a sign the plant needs water.",
+            label = paste("Do the leaves seem dry and yellowing? This is a", 
+                          "sign the plant needs water."),
             choices = c("Yes", "No")
           ),
           
           # Signs overwatering
           radioButtons(
             "water4",
-            label = "Do the leaves seem soft and limp? This is a sign of overwatering.",
+            label = paste("Do the leaves seem soft and limp?", 
+                          "This is a sign of overwatering."),
             choices = c("Yes", "No")
           )
           
@@ -267,7 +275,12 @@ GUI <- function(){
         selectInput(
           "light",
           label = "In which type of light do you keep your plant?",
-          choices = c("Bright indirect", "Low indirect", "Bright direct", "Low direct")
+          choices = c(
+            "Bright indirect", 
+            "Low indirect", 
+            "Bright direct", 
+            "Low direct"
+            )
         )
         ),
         
@@ -277,7 +290,8 @@ GUI <- function(){
         # Fertilizer
         sliderInput(
           "fertilizer",
-          label = "How many months have passed since you last fertilized your plant?",
+          label = paste("How many months have passed", 
+                        "since you last fertilized your plant?"),
           min = 0,
           max = 6,
           value = 1
@@ -300,7 +314,8 @@ GUI <- function(){
       # Repotting: Drainage: Pick up
         radioButtons(
           "repotting2",
-          label = "Pick up the pot and look at the drainage holes. Do you see roots coming out the bottom?",
+          label = paste("Pick up the pot and look at the drainage holes.", 
+                        "Do you see roots coming out the bottom?"),
           choices = c("Yes", "No")
         )
         ),
@@ -311,8 +326,12 @@ GUI <- function(){
       # Repotting: No drainage: Check roots
         radioButtons(
           "repotting3",
-          label = "Gently remove the plant from its pot. How do the roots look like?",
-          choices = c("I can see no visible roots", "The roots are very visible")
+          label = paste("Gently remove the plant from its pot.", 
+                        "How do the roots look like?"),
+          choices = c(
+            "I can see no visible roots",
+            "The roots are very visible"
+            )
         )
       )
         )
@@ -327,10 +346,10 @@ GUI <- function(){
     output$image <- renderUI({
       
       # An option must be selected
-      req(input$selected_plant)
+      req(input$my_plant)
       
       # Path to the image file
-      imagePath <- paste0(input$selected_plant, ".jpg")
+      imagePath <- paste0(input$my_plant, ".jpg")
       
       # Check if the image file exists
       if (file.exists(file.path("www", imagePath))) {
@@ -343,15 +362,17 @@ GUI <- function(){
     output$plant_found <- renderText({
      
       # An option must be selected
-      req(input$selected_plant)
+      req(input$my_plant)
       
-      if (input$selected_plant == "My plant is not on the list") {
+      if (input$my_plant == "My plant is not on the list") {
         stop("You plant is not in our database. Please find care guidance here: 
              https://garden.org/plants/group >> Select your plant >> 
              Select \"Visit our Plant Care Guides for...\"")
       } else {
-        if (input$selected_plant == "I don't know the name of my plant") {
-          stop("Please find the name of your plant using this free online tool: https://plant.id/. You can then return and continue your search.")
+        if (input$my_plant == "I don't know the name of my plant") {
+          stop(paste("Please find the name of your plant using this free",
+          "online tool: https://plant.id/. You can then return and continue", 
+          "your search."))
         } 
       }
     })
@@ -359,12 +380,12 @@ GUI <- function(){
     # Show modal dialog when "Get advice" button is pressed
     observeEvent(input$submit, {
       showModal(modalDialog(
-        title = paste("Care advice for your", input$selected_plant),
+        title = paste("Care advice for your", input$my_plant),
         p(paste("Advice selected:", paste(input$advice, collapse = ", "))),
         if("Watering" %in% input$advice) {
           
           # For the plants watered based on the "soil"
-          if(!is.numeric(plant_data[plant_data$plant == input$selected_plant, 
+          if(!is.numeric(data[data$plant == input$my_plant, 
                         "water_amount"])) {
             
             # If the soil is wet, do not water
@@ -375,14 +396,14 @@ GUI <- function(){
               # Soil is dry, no underwatering, no overwatering
               if(input$water3 == "No" & input$water4 == "No") {
                 p(paste("Time to water your plant! Provide a", 
-                        plant_data[plant_data$plant == input$selected_plant, "water_amount"], 
+                        data[data$plant == input$my_plant, "water_amount"], 
                         "quantity."))
               } else {
                 # Soil is dry, underwatering
                 if(input$water3 == "Yes") {
-                  p(paste("Your plant really needs water. Water immediately with a", 
-                          plant_data[plant_data$plant == input$selected_plant, 
-                                     "water_amount"], 
+                  p(paste("Your plant really needs water. Water",
+                          "immediately with a", 
+                          data[data$plant == input$my_plant, "water_amount"], 
                           "quantity."
                   )
                   )
@@ -392,7 +413,7 @@ GUI <- function(){
                 if(input$water3 == "Yes") {
                   p(paste("Your plant is showing sign of overwatering.",
                           "Let it be for two days, then water with a",
-                          plant_data[plant_data$plant == input$selected_plant,
+                          data[data$plant == input$my_plant,
                                      "water_amount"],
                           "quantity."
                   )
@@ -406,7 +427,8 @@ GUI <- function(){
             # If the plant is watered based on the number of days
             
             # If the number of days was exceeded
-              if(input$water1 < plant_data[plant_data$plant == input$selected_plant,"water_amount"]){
+              if(input$water1 < data[data$plant == input$my_plant,
+                                     "water_amount"]) {
                 p(paste("Your plant is fine! No water needed yet."))
               } else { 
                 
@@ -417,8 +439,9 @@ GUI <- function(){
                   
                   # Dry soil, underwatering
                   if(input$water3 == "Yes") {
-                    p(paste("Your plant really needs water. Water immediately with a", 
-                            plant_data[plant_data$plant == input$selected_plant, 
+                    p(paste("Your plant really needs water.", 
+                            "Water immediately with a", 
+                            data[data$plant == input$my_plant, 
                                        "water_amount"], 
                             "quantity."
                     )
@@ -427,7 +450,7 @@ GUI <- function(){
                     if (input$water4 == "Yes"){ 
                       p(paste("Your plant is showing sign of overwatering.",
                               "Wait two days, then water with a",
-                              plant_data[plant_data$plant == input$selected_plant,
+                              data[data$plant == input$my_plant,
                                          "water_amount"],
                               "quantity."
                       )
@@ -442,12 +465,14 @@ GUI <- function(){
         
         if("Light" %in% input$advice) {
           
-          # If plant_data$light matches response, don't move
-          if(grep(input$light, plant_data[plant_data$input$selected_plant, 
+          # If data$light matches response, don't move
+          if(grep(input$light, data[data$input$my_plant, 
                                           "light"])) {
             p(paste("The light is good for your plant, don't move it."))
           } else {
-            p(paste("Move your plat to a spot with", plant_data[plant_data$input$selected_plant, "light"], "light."))
+            p(paste("Move your plat to a spot with",
+                    data[data$input$my_plant, "light"],
+                    "light."))
           }
         },
         
@@ -472,7 +497,30 @@ GUI <- function(){
   
 }
 
-GUI()
+PlantCare()
+
+
+
+
+
+
+
+
+
+# Problem: says overwatered too often
+# Problem: Add fertilizer
+# Problem: Light does not work
+# Problem: Images not visible
+# Problem: Style
+
+
+
+
+
+
+
+
+
 
 
 
