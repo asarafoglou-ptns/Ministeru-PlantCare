@@ -51,6 +51,4 @@ rm(list = ls())
 devtools::install()
 
 library(PlantCare)
-GUI()
-?GUI
 
