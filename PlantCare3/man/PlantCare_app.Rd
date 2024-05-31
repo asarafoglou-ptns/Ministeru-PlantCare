@@ -16,16 +16,19 @@ No return. There will be a pop-up with the user interface. Interrupt
 R to stop the application (press "Stop" button or press Esc).
 }
 \description{
-An interactive app that gives advice on whether to water, fertilize, repot,
-or change light conditions for common houseplants. The advice is
-plant-specific.Assumes the user is close
-to their plant, i.e., to feel whether the soil is wet and see if the
-leaves are dry or soft. Uses data scrapped from the website
-https://plantsage.org/.
+An interactive app that gives advice on how to care for common houseplants,
+based on the plant species and its current state. Assumes the user is close
+to their plant, i.e., to feel whether the soil is wet. Uses data scrapped
+from https://plantsage.org/.
 }
 \examples{
 # PlantCare_app()
 }
 \references{
-Plant Sage. (n.d.). Plant Sage. Retrieved May 31, 2024, from https://plantsage.org/
+Plant Sage. (n.d.). Plant Sage. Retrieved May 31, 2024,
+from https://plantsage.org/ \cr
+Plant.id. (n.d.). Plant.id. Retrieved May 31, 2024, from
+https://plant.id/ \cr
+Sweet, L., et al. (n.d.). How to repot a plant. wikiHow.
+Retrieved May 31, 2024, from https://www.wikihow.com/Repot-a-Plant
 }
