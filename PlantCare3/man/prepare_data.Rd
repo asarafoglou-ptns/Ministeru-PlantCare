@@ -25,5 +25,5 @@ data <- prepare_data()
 View(data)
 }
 \references{
-Plant Sage. (n.d.). Plant Sage. Retrieved May 31, 2024, from https://plantsage.org/reference
+Plant Sage. (n.d.). Plant Sage. Retrieved May 31, 2024, from https://plantsage.org/
 }

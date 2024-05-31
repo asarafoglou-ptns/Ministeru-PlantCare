@@ -26,3 +26,6 @@ https://plantsage.org/.
 \examples{
 # PlantCare_app()
 }
+\references{
+Plant Sage. (n.d.). Plant Sage. Retrieved May 31, 2024, from https://plantsage.org/
+}
