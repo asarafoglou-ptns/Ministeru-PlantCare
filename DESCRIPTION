@@ -1,11 +1,13 @@
-Package: PlantCare
-Title: Shiny App that gives recommendations on how to care for common houseplants
+Package: PlantCare3
+Title: Personalized Plant Care Advice
 Version: 0.0.0.9000
 Authors@R: 
-    person("Sabina", "Ministeru", , "sabina.ministeru@gmail.com", role = c("aut", "cre"))
-Description: PlantCare.R is a Shiny app that givs advice on how to care for common houseplants. This includes advice on whether to water your plant, use fertilizer, or change the lightining conditions for the plant. The advice is based on the type of plant and current characteristics (i.e., whether the soild feels dry, whether the leaves are droopy). We assume you are close to your plant while using the app.
+    person("Sabina", "Ministeru", , "sabina.ministeru@gmail.com", role = c("aut", "cre"),
+           )
+Description: PlantCare.R provides personalized care advice for 11 common houseplants. The user answers some questions in an interactive interface, and then received advice. The advice is based on the species and current stae of the plant. The information is taken from https://plantsage.org/. The user is assumed to be close to their plant. 
 License: CC BY 4.0
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.1
-Imports: readr, dplyr, jsonlite, shiny, bslib
+Imports: dplyr, readr, jsonlite, shiny, bslib
+LazyData: true

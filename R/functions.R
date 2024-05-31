@@ -13,16 +13,22 @@ library(remotes)
 
 
 ## Create function to scrap data
-#' @title Scrap Plant Data
+#' @title Scrap and Prepare Plant Data
 #' @description
-#' Scraps plant data from the website https://plantsage.org/, and returns 
-#' the data as a data frame. 
-#' @param ... Does not contain arguments. The data is manually added as a 
-#' JavaScript object, cleaned up and returned as a data frame. 
-#' @return A data frame with plant data for 11 common houseplants.
-#' @example example_scrap-data-function.R
+#' Scraps plant data from the website https://plantsage.org/.
+#' Some new columns are added; these contain the same information as in the
+#' data set https://plantsage.org/ but reformulated for easier use with the
+#' PlantCare app. The reformulation was done by the package maintainer.
+#' @param ... Does not contain arguments. The data is manually added as a
+#' JavaScript object, cleaned up, restructured, and returned as a data frame.
+#' @return An 11 x 13 data frame with plant data for 11 common houseplants,
+#' ready for use with the PlantCare app.
+#' @examples
+#' data <- prepare_data()
+#' View(data)
+#' @references Plant Sage. (n.d.). Plant Sage. Retrieved May 31, 2024, from https://plantsage.org/reference
 #' @export
-scrap_data <- function() {
+prepare_data <- function() {
   # Taking a Java object and putting it in a data frame
   data_string <- '
   [
@@ -126,70 +132,48 @@ scrap_data <- function() {
           "notes": "Keep away from cold rooms and areas with a draught. A stable and moderate temperature of around 19-21C is ideal for a string-of-turtles plant. Pruning can be useful to maintain a dense and healthy plant."
       }
   ]'
-  
-  # Creating data frame  
+
+  # Creating data frame
   data <- jsonlite::fromJSON(data_string, simplifyDataFrame = TRUE)
-  
+
+  # Adding column: After how many days the plant needs water
+  data <- cbind(data, watering_days = NA)
+
+  # 2-3 times per week: every 4 days
+  data$watering_days[grep("2-3 times", data$watering)] <- 4
+
+  # Every 3-7 days and once weekly: every 7 days
+  data$watering_days[grep("3-7 days", data$watering)] <- 7
+  data$watering_days[grep("once weekly", data$watering)] <- 7
+
+  # Fortnight or every 2 weeks: every 14 days
+  data$watering_days[grep("fortnight", data$watering)] <- 14
+  data$watering_days[grep("every 2 weeks", data$watering) ] <- 14
+
+  # Some plants do not have specified number of days; the soil must be checked
+  data$watering_days[grep("soil", data$watering)] <- "soil"
+
+
+  # Adding column: Water amount
+  data <- cbind(data, water_amount = NA)
+  data$water_amount[grep("Moderate",
+                         data$watering,ignore.case = T)] <- "moderate"
+  data$water_amount[grep("Low", data$watering, ignore.case = T)] <- "low"
+  data$water_amount[grep("High", data$watering, ignore.case = T)] <- "high"
+  data$water_amount <- ifelse(is.na(data$water_amount),
+                              "moderate",
+                              data$water_amount)
+
+
+  # Adding column: fertilizer per month
+  data <- cbind(data, f_growing = c(rep(1, 11)))
+  data <- cbind(data, f_winter = c(1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0))
+  data <- cbind(data, f_growing_months = c(0.5, 2, 4, 1, 1, 0.25, 2, 1, 1, 2,
+                                           0.5))
+  data <- cbind(data, f_winter_months = c(0.5, NA, NA, NA, NA, 1, 2, 2, NA, NA,
+                                          NA))
+
   return(data)
 }
 
-## Create function to add information needed for the app
-#' @title Prepares Data for Use with the PlantCare App
-#' @description
-#' Takes data frame with plant data and adds columns with information necessary 
-#' for the PlantCare app, such as after how many days to water, or 
-#' after how many months to fertilize. The information in the columns is 
-#' chosen by a human based on the information existent in the data frame 
-#' provided as an argument. Use of different data is not permitted. 
-#' @param data A data frame of 11 x 7, obtained by using the scrap_data() 
-#' function. Use of the final_data() with another data
-#' frame will result in an error.
-#' @return A data frame of 11 x 13, containing plant data scrapped from the 
-#' internet and additional columns needed for the PlantCare app.
-#' @example example_final-data-function.R
-#' @export
-final_data <- function(data = scrap_data()) {
-  if(!identical(data, scrap_data())) {
-    stop(paste("The input must be the data frame returned by the scrap_data()",
-               "function."))
-  } else {
-    # Adding column: After how many days the plant needs water
-    data <- cbind(data, watering_days = NA)
-    
-    # 2-3 times per week: every 4 days
-    data$watering_days[grep("2-3 times", data$watering)] <- 4
-    
-    # Every 3-7 days and once weekly: every 7 days
-    data$watering_days[grep("3-7 days", data$watering)] <- 7
-    data$watering_days[grep("once weekly", data$watering)] <- 7
-    
-    # Fortnight or every 2 weeks: every 14 days
-    data$watering_days[grep("fortnight", data$watering)] <- 14
-    data$watering_days[grep("every 2 weeks", data$watering) ] <- 14
-    
-    # Some plants do not have specified number of days; the soil must be checked
-    data$watering_days[grep("soil", data$watering)] <- "soil"
-    
-    
-    # Adding column: Water amount
-    data <- cbind(data, water_amount = NA)
-    data$water_amount[grep("Moderate", 
-                           data$watering,ignore.case = T)] <- "moderate"
-    data$water_amount[grep("Low", data$watering, ignore.case = T)] <- "low"
-    data$water_amount[grep("High", data$watering, ignore.case = T)] <- "high"
-    data$water_amount <- ifelse(is.na(data$water_amount), 
-                                "moderate", 
-                                data$water_amount)
-    
-    
-    # Adding column: fertilizer per month
-    data <- cbind(data, f_growing = c(rep(1, 11)))
-    data <- cbind(data, f_winter = c(1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0))
-    data <- cbind(data, f_growing_months = c(0.5, 2, 4, 1, 1, 0.25, 2, 1, 1, 2, 
-                                             0.5))
-    data <- cbind(data, f_winter_months = c(0.5, NA, NA, NA, NA, 1, 2, 2, NA, NA, 
-                                            NA))
-    
-    return(data)
-  }
-}
+?prepare_data()

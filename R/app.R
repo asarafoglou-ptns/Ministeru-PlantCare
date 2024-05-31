@@ -1,6 +1,5 @@
-library(PlantCare)
-#library(shiny)
-#source("R/functions.R")
+library(PlantCare3)
+
 
 ## Create the Shiny app
 #' @title Plant Care Shiny App
@@ -16,9 +15,10 @@ library(PlantCare)
 #' from the final_data() function.
 #' @return No return. There will be a pop-up with the user interface. Interrupt
 #' R to stop the application (press "Stop" button or press Esc).
-#' @example
+#' @examples
+#' # PlantCare_app()
 #' @export
-PlantCare_app <- function(data = final_data()){
+PlantCare_app <- function(data = prepare_data()){
 
      # Define UI for application
   ui <- fluidPage(
@@ -342,9 +342,7 @@ PlantCare_app <- function(data = final_data()){
 
 
   #Define shiny appliction
-  shinyApp(ui = ui, server = server)
-
-  runApp(appDir = "Ministeru-PlantCare/R")
+  runApp(shinyApp(ui = ui, server = server))
 
 }
 
