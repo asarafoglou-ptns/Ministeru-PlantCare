@@ -1,23 +1,5 @@
 library(PlantCare3)
 
-
-## Create the Shiny app
-#' @title Plant Care Shiny App
-#' @description
-#' An interactive app that gives advice on whether to water, fertilize, repot,
-#' or change light conditions for common houseplants. The advice is
-#' plant-specific.Assumes the user is close
-#' to their plant, i.e., to feel whether the soil is wet and see if the
-#' leaves are dry or soft. Uses data scrapped from the website
-#' https://plantsage.org/.
-#' @param data Can be the 11 x 13 data frame obtained from final_data() or any
-#' other object. Will be overwritten immediately with the data frame obtained
-#' from the final_data() function.
-#' @return No return. There will be a pop-up with the user interface. Interrupt
-#' R to stop the application (press "Stop" button or press Esc).
-#' @examples
-#' # PlantCare_app()
-#' @export
 PlantCare_app <- function(data = prepare_data()){
 
      # Define UI for application
