@@ -1,4 +1,8 @@
-
+library(dplyr)
+library(readr)
+library(jsonlite)
+library(shiny)
+library(bslib)
 
 ## Create function to scrap data
 #' @title Scrap and Prepare Plant Data
@@ -164,4 +168,4 @@ prepare_data <- function() {
   return(data)
 }
 
-?prepare_data()
+
