@@ -1,6 +1,12 @@
+###############################################################################
+#                            The PlantCare.R Package                          #
+#               Sabina Ministeru, course: Programming: The Next Step          #
+#                                 31 May 2024                                 #
+###############################################################################
 
 
-## Create function to scrap data
+# prepare_data(): Scrap and Prepare Plant Data ---------------------------------
+
 #' @title Scrap and Prepare Plant Data
 #' @description
 #' Scraps plant data from the website https://plantsage.org/.
@@ -170,7 +176,9 @@ prepare_data <- function() {
 }
 
 
-## Create the Shiny app
+
+# PlantCare_app(): The PlantCare App -------------------------------------------
+
 #' @title Plant Care Shiny App
 #' @description
 #' An interactive app that gives advice on whether to water, fertilize, repot,
@@ -443,7 +451,8 @@ PlantCare_app <- function(data = prepare_data()) {
                   ))
                 } else {
                   # Soil is dry, underwatering
-                  if (input$water3 == "Yes" & input$water4 == "No") {
+                  if (input$water3 == "Yes" &
+                      input$water4 == "No") {
                     p(
                       paste(
                         "Your plant really needs water. Water",
@@ -482,7 +491,8 @@ PlantCare_app <- function(data = prepare_data()) {
                     ))
                   } else {
                     # Soil is dry, underwatering
-                    if (input$water3 == "Yes" & input$water4 == "No") {
+                    if (input$water3 == "Yes" &
+                        input$water4 == "No") {
                       p(
                         paste(
                           "Your plant really needs water. Water",
@@ -569,18 +579,21 @@ PlantCare_app <- function(data = prepare_data()) {
             }
           },
           
+          # Repotting
           if ("Repotting" %in% input$advice) {
-            if (!is.na(input$repotting2)) {
-              if (input$repotting2 == "Yes") {
-                p(
-                  paste(
-                    "Repotting time! Transfer your plant gently to a pot",
-                    "5cm wider and 5cm deeper than the current one. Check out",
-                    "https://www.wikihow.com/Repot-a-Plant for step-by-step",
-                    "instructions with pictures."
-                  )
+            if (input$repotting2 == "Yes" |
+                input$repotting3 == "The roots are very visible") {
+              p(
+                paste(
+                  "Repotting time! Transfer your plant gently to a pot",
+                  "5cm wider and 5cm deeper than the current one. Check out",
+                  "https://www.wikihow.com/Repot-a-Plant for step-by-step",
+                  "instructions with pictures."
                 )
-              } else {
+              )
+            } else {
+              if (input$repotting2 == "No" |
+                  input$repotting3 == "I can see no visible roots") {
                 p(
                   paste(
                     "Your plant is in the right-sized pot for now! Check again",
@@ -588,43 +601,16 @@ PlantCare_app <- function(data = prepare_data()) {
                   )
                 )
               }
-            } else {
-              if (!is.na(input$repotting3)) {
-                if (input$repotting3 == "I can see no visible roots") {
-                  p(paste(
-                    "Your plant is in the right-sized pot for now! Check again",
-                    "in 2 months. HELLO"
-                  )
-                  )
-                } else {
-                  if (input$repotting3 == "The roots are very visible")
-                  {
-                    p(
-                      paste(
-                        "Repotting time! Transfer your plant gently to a pot",
-                        "5cm wider and 5cm deeper than the current",
-                        "one. Check out https://www.wikihow.com/Repot-a-Plant",
-                        "for step-by-step instructions with pictures."
-                      )
-                    )
-                    
-        }
-                }
-              }
-              
             }
             
-            
-            
-            
           },
-        
-        easyClose = TRUE,
-        footer = NULL
+          
+          easyClose = TRUE,
+          footer = NULL
+        )
       )
-    )
     })
-
+    
   }
   
   
@@ -634,8 +620,11 @@ PlantCare_app <- function(data = prepare_data()) {
 }
 
 
-# Problem: Images not visible
 
+
+
+
+### Credit --------------------------------------------------------------------
 
 ### Database credit: Database taken from: https://plantsage.org/
 
@@ -644,3 +633,7 @@ PlantCare_app <- function(data = prepare_data()) {
 # https://miro.medium.com/max/4000/1*aEVMbEExBTVfvv1j4pqiPg.jpeg
 # "My plant is not in the list" picture taken from:
 #http://clipart-library.com/data_images/109158.png
+
+### Other resources used:
+# Plant identifier: https://plant.id/
+# Step-by-step repotting instructions: https://www.wikihow.com/Repot-a-Plant
