@@ -1,10 +1,10 @@
+
+
 ###############################################################################
 #                            The PlantCare.R Package                          #
 #               Sabina Ministeru, course: Programming: The Next Step          #
 #                                 31 May 2024                                 #
 ###############################################################################
-
-
 
 
 
@@ -184,7 +184,6 @@ prepare_data <- function() {
 
 
 
-
 # PlantCare_app(): The PlantCare App -------------------------------------------
 
 #' @title Plant Care Shiny App
@@ -256,14 +255,7 @@ PlantCare_app <- function(data = prepare_data()) {
           multiple = TRUE
         ),
         
-        # Action button: Restart
-        shiny::actionButton(
-          "restart",
-          label = "Restart",
-          icon = shiny::icon("rotate-right")
-        ),
         
-        shiny::br(),
         # Add space
         shiny::br(),
         
@@ -400,15 +392,17 @@ PlantCare_app <- function(data = prepare_data()) {
   
   # Define server logic required for the app
   server <- function(input, output) {
+    
+    # Show image for selected plant
     output$image <- shiny::renderUI({
       # An option must be selected
       shiny::req(input$my_plant)
       
       # Path to the image file
-      imagePath <- paste0(input$my_plant, ".jpg")
+      imagePath <- file.path(paste0("../www", input$my_plant, ".jpg"))
       
       # Check if the image file exists
-      if (file.exists(file.path("www", imagePath))) {
+      if (file.exists(file.path(imagePath))) {
         tags$img(src = imagePath, height = "125px")
       } else {
         tags$p("Image not found")
@@ -628,12 +622,13 @@ PlantCare_app <- function(data = prepare_data()) {
     
   }
   
+  # Define shiny appliction
+  shiny::shinyApp(ui = ui, server = server)
   
-  #Define shiny appliction
-  shiny::runApp(shiny::shinyApp(ui = ui, server = server))
+  # Run the Shiny app
+  shiny::runApp()
   
 }
-
 
 
 
