@@ -195,20 +195,23 @@ prepare_data <- function() {
 #' from https://plantsage.org/.
 #' @param data Can be the 11 x 13 data frame obtained from final_data() or any
 #' other object. Will be overwritten immediately with the data frame obtained
-#' from the final_data() function.
+#' from the prepare_data() function.
 #' @return No return. There will be a pop-up with the user interface. Interrupt
 #' R to stop the application (press "Stop" button or press Esc).
 #' @examples
 #' # PlantCare_app()
 #' @references Plant Sage. (n.d.). Plant Sage. Retrieved May 31, 2024, 
 #' from https://plantsage.org/ \cr
+#' \cr
 #' Plant.id. (n.d.). Plant.id. Retrieved May 31, 2024, from 
 #' https://plant.id/ \cr
+#' \cr
 #' Sweet, L., et al. (n.d.). How to repot a plant. wikiHow. 
 #' Retrieved May 31, 2024, from https://www.wikihow.com/Repot-a-Plant
 #' 
 #' @export
 PlantCare_app <- function(data = prepare_data()) {
+  
   data <- prepare_data()
   
   # Define UI for application
@@ -636,7 +639,7 @@ PlantCare_app <- function(data = prepare_data()) {
 
 
 
-### Credit --------------------------------------------------------------------
+### Credits --------------------------------------------------------------------
 
 ### Database credit: Database taken from: https://plantsage.org/
 
