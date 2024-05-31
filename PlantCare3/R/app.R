@@ -575,8 +575,8 @@ PlantCare_app <- function(data = prepare_data()) {
                 p(
                   paste(
                     "Repotting time! Transfer your plant gently to a pot",
-                    "that is about 5cm wider and 5cm deeper than the current one. Check",
-                    "out https://www.wikihow.com/Repot-a-Plant for step-by-step",
+                    "5cm wider and 5cm deeper than the current one. Check out",
+                    "https://www.wikihow.com/Repot-a-Plant for step-by-step",
                     "instructions with pictures."
                   )
                 )
@@ -602,7 +602,7 @@ PlantCare_app <- function(data = prepare_data()) {
                     p(
                       paste(
                         "Repotting time! Transfer your plant gently to a pot",
-                        "that is about 5cm wider and 5cm deeper than the current",
+                        "5cm wider and 5cm deeper than the current",
                         "one. Check out https://www.wikihow.com/Repot-a-Plant",
                         "for step-by-step instructions with pictures."
                       )
