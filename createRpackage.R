@@ -15,7 +15,7 @@ library(usethis)
 devtools::create('PlantCare')
 
 # set working directory to *inside* your R package
-setwd("C:/Users/sabina/OneDrive - UvA/.ResMas/PTNS - Programming the Next Step/PlantCare")
+setwd("C:/Users/sabina/OneDrive - UvA/.ResMas/PTNS - Programming the Next Step/Ministeru-PlantCare")
 
 # populate the DESCRIPTION file
 # never touch your NAMESPACE file
