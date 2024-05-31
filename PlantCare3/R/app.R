@@ -633,7 +633,6 @@ PlantCare_app <- function(data = prepare_data()) {
   
 }
 
-PlantCare_app()
 
 # Problem: Images not visible
 
