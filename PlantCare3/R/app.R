@@ -1,8 +1,3 @@
-library(dplyr)
-library(readr)
-library(jsonlite)
-library(shiny)
-library(bslib)
 
 ## Create function to scrap data
 #' @title Scrap and Prepare Plant Data
@@ -191,17 +186,17 @@ PlantCare_app <- function(data = prepare_data()){
   data<- prepare_data()
 
      # Define UI for application
-  ui <- fluidPage(
+  ui <- shiny::fluidPage(
 
     # Application title
-    titlePanel("PlantCare Guide"),
+    shiny::titlePanel("PlantCare Guide"),
 
     #Select plant from drop-down list
-    sidebarLayout(
-      sidebarPanel(
+    shiny::sidebarLayout(
+      shiny::sidebarPanel(
 
         # Select plant
-        selectInput(
+        shiny::selectInput(
           "my_plant",
           label = "Select your plant:",
           choices = c(data$plant, "I don't know the name of my plant",
@@ -209,19 +204,20 @@ PlantCare_app <- function(data = prepare_data()){
           multiple = FALSE
         ),
 
-        br(), # Adds space
+        shiny::br(), # Adds space
+        
 
         # Image of plant during selection
-        uiOutput("image"),
+        shiny::uiOutput("image"),
 
         #Error message if the plant is not found or the name is not known
-        textOutput("plant_found"),
+        shiny::textOutput("plant_found"),
 
-        br(), # Adds space
-        br(),
+        shiny::br(), # Adds space
+        shiny::br(),
 
         # Selects which advice they want
-        selectInput(
+        shiny::selectInput(
           "advice",
           label = "I want advice about:",
           choices = c("Watering", "Light", "Fertilizing", "Repotting"),
@@ -229,31 +225,31 @@ PlantCare_app <- function(data = prepare_data()){
         ),
 
         # Action button: Restart
-        actionButton(
+        shiny::actionButton(
           "restart",
           label = "Restart",
-          icon = icon("rotate-right")
+          icon = shiny::icon("rotate-right")
         ),
 
-        br(), # Add space
-        br(),
+        shiny::br(), # Add space
+        shiny::br(),
 
         # Action button: Submit
-        actionButton(
+        shiny::actionButton(
           "submit",
           label = "Get advice",
-          icon = icon("pagelines")
+          icon = shiny::icon("pagelines")
         )
 
         ),
 
-      mainPanel(
+      shiny::mainPanel(
 
-        conditionalPanel(
+        shiny::conditionalPanel(
           condition = "input.advice.includes(\"Watering\")",
 
           # Number of days since last watering
-          sliderInput(
+          shiny::sliderInput(
             "water1",
             label = "How many days have passed since you watered your plant?",
             min = 0,
@@ -263,7 +259,7 @@ PlantCare_app <- function(data = prepare_data()){
           ),
 
           # Soil feels dry or not
-          radioButtons(
+          shiny::radioButtons(
             "water2",
             label = paste("Stick your finger in the soil until your nail is",
                           "completely covered. Does the soil feel dry?"),
@@ -271,7 +267,7 @@ PlantCare_app <- function(data = prepare_data()){
           ),
 
           # Signs underwatering
-          radioButtons(
+          shiny::radioButtons(
             "water3",
             label = paste("Do the leaves seem dry and yellowing? This is a",
                           "sign the plant needs water."),
@@ -279,7 +275,7 @@ PlantCare_app <- function(data = prepare_data()){
           ),
 
           # Signs overwatering
-          radioButtons(
+          shiny::radioButtons(
             "water4",
             label = paste("Do the leaves seem soft and limp?",
                           "This is a sign of overwatering."),
@@ -288,11 +284,11 @@ PlantCare_app <- function(data = prepare_data()){
 
         ),
 
-        conditionalPanel(
+        shiny::conditionalPanel(
           condition = "input.advice.includes(\"Light\")",
 
         # Light
-        selectInput(
+        shiny::selectInput(
           "light",
           label = "In which type of light do you keep your plant?",
           choices = c(
@@ -304,11 +300,11 @@ PlantCare_app <- function(data = prepare_data()){
         )
         ),
 
-        conditionalPanel(
+        shiny::conditionalPanel(
           condition = "input.advice.includes(\"Fertilizing\")",
 
         # Fertilizer
-        sliderInput(
+        shiny::sliderInput(
           "fertilizer",
           label = paste("How many months have passed",
                         "since you last fertilized your plant?"),
@@ -318,21 +314,21 @@ PlantCare_app <- function(data = prepare_data()){
           )
         ),
 
-        conditionalPanel(
+        shiny::conditionalPanel(
           condition = "input.advice.includes(\"Repotting\")",
 
         # Repotting: Drainage holes
-        radioButtons(
+        shiny::radioButtons(
           "repotting1_drainage",
           label = "Does your pot have drainage holes?",
           choices = c("Yes", "No")
         ),
 
-        conditionalPanel(
+        shiny::conditionalPanel(
           condition = "input.repotting1_drainage == \"Yes\"",
 
       # Repotting: Drainage: Pick up
-        radioButtons(
+      shiny::radioButtons(
           "repotting2",
           label = paste("Pick up the pot and look at the drainage holes.",
                         "Do you see roots coming out the bottom?"),
@@ -340,11 +336,11 @@ PlantCare_app <- function(data = prepare_data()){
         )
         ),
 
-      conditionalPanel(
+      shiny::conditionalPanel(
         condition = "input.repotting1_drainage == \"No\"",
 
       # Repotting: No drainage: Check roots
-        radioButtons(
+      shiny::radioButtons(
           "repotting3",
           label = paste("Gently remove the plant from its pot.",
                         "How do the roots look like?"),
@@ -363,10 +359,10 @@ PlantCare_app <- function(data = prepare_data()){
   # Define server logic required for the app
   server <- function(input, output) {
 
-    output$image <- renderUI({
+    output$image <- shiny::renderUI({
 
       # An option must be selected
-      req(input$my_plant)
+      shiny::req(input$my_plant)
 
       # Path to the image file
       imagePath <- paste0(input$my_plant, ".jpg")
@@ -379,10 +375,10 @@ PlantCare_app <- function(data = prepare_data()){
       }
     })
 
-    output$plant_found <- renderText({
+    output$plant_found <- shiny::renderText({
 
       # An option must be selected
-      req(input$my_plant)
+      shiny::req(input$my_plant)
 
       if (input$my_plant == "My plant is not on the list") {
         stop("You plant is not in our database. Please find care guidance here:
@@ -398,8 +394,8 @@ PlantCare_app <- function(data = prepare_data()){
     })
 
     # Show modal dialog when "Get advice" button is pressed
-    observeEvent(input$submit, {
-      showModal(modalDialog(
+    shiny::observeEvent(input$submit, {
+      shiny::showModal(shiny::modalDialog(
         title = paste("Care advice for your", input$my_plant),
         p(paste("Advice selected:", paste(input$advice, collapse = ", "))),
         if("Watering" %in% input$advice) {
@@ -512,10 +508,9 @@ PlantCare_app <- function(data = prepare_data()){
 
 
   #Define shiny appliction
-  runApp(shinyApp(ui = ui, server = server))
+  shiny::runApp(shiny::shinyApp(ui = ui, server = server))
 
 }
-
 
 
 
@@ -525,9 +520,6 @@ PlantCare_app <- function(data = prepare_data()){
 # Problem: Light does not work
 # Problem: Images not visible
 # Problem: Style
-
-
-
 
 
 
