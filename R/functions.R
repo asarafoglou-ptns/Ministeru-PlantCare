@@ -1,15 +1,3 @@
-# install.packages("readr")
-# install.packages("dplyr")
-# install.packages("jsonlite")
-# install.packages("shiny")
-# install.packages("bslib")
-
-library(dplyr)
-library(readr)
-library(jsonlite)
-library(shiny)
-library(bslib)
-library(remotes)
 
 
 ## Create function to scrap data
