@@ -584,7 +584,7 @@ PlantCare_app <- function(data = prepare_data()) {
                 p(
                   paste(
                     "Your plant is in the right-sized pot for now! Check again",
-                    "in 2 months"
+                    "in 2 months."
                   )
                 )
               }
@@ -593,7 +593,7 @@ PlantCare_app <- function(data = prepare_data()) {
                 if (input$repotting3 == "I can see no visible roots") {
                   p(paste(
                     "Your plant is in the right-sized pot for now! Check again",
-                    "in 2 months"
+                    "in 2 months. HELLO"
                   )
                   )
                 } else {
